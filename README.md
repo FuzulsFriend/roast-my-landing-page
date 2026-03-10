@@ -3,7 +3,6 @@
 # Roast My Landing Page
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-orange)](https://code.claude.com)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-open%20standard-orange)](SKILL.md)
 
 Give Claude a URL. Get a scored, plain-English report with specific fixes and time estimates.
@@ -150,4 +149,4 @@ MIT
 
 ---
 
-*Made by [FuzulsFriend](https://github.com/FuzulsFriend) · Built with [Claude Code](https://code.claude.com)*
+*Made by [FuzulsFriend](https://github.com/FuzulsFriend)*
