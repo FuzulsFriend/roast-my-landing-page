@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landing Page Roast Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent: #f97316;
+    --accent-dim: rgba(249, 115, 22, 0.15);
+    --success: #22c55e;
+    --success-dim: rgba(34, 197, 94, 0.12);
+    --warning: #f59e0b;
+    --warning-dim: rgba(245, 158, 11, 0.12);
+    --critical: #ef4444;
+    --critical-dim: rgba(239, 68, 68, 0.12);
+    --suggestion: #3b82f6;
+    --suggestion-dim: rgba(59, 130, 246, 0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --max-w: 900px;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px 16px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+
+  /* ---- ANIMATIONS ---- */
+  .fade-in-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes gauge-fill {
+    from { stroke-dashoffset: 565; }
+  }
+
+  @keyframes bar-fill {
+    from { width: 0; }
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #f97316, #ef4444, #f97316);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .header-url {
+    display: inline-block;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1.05rem;
+    word-break: break-all;
+    border-bottom: 1px dashed var(--accent);
+    padding-bottom: 2px;
+    transition: opacity 0.2s;
+  }
+  .header-url:hover { opacity: 0.8; }
+
+  .meta-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  .pill-label { font-weight: 600; color: var(--text); }
+
+  .provisional-banner {
+    display: none;
+    margin-top: 20px;
+    padding: 14px 20px;
+    background: var(--warning-dim);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    color: var(--warning);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .provisional-banner.show { display: block; }
+
+  /* ---- SCORE HERO ---- */
+  .score-hero {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 40px 20px;
+  }
+  .gauge-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px;
+  }
+  .gauge-svg {
+    width: 200px;
+    height: 200px;
+    transform: rotate(-90deg);
+  }
+  .gauge-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 12;
+  }
+  .gauge-fill {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .gauge-score {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .gauge-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .gauge-out-of {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .gauge-grade {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+  .verdict {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 16px auto 0;
+  }
+
+  /* ---- DIMENSION BARS ---- */
+  .dimension-section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title-icon { font-size: 1.3rem; }
+
+  .dim-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .dim-name {
+    width: 160px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dim-critical-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--critical);
+    background: var(--critical-dim);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .dim-track {
+    flex: 1;
+    min-width: 100px;
+    height: 14px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+  }
+  .dim-fill {
+    height: 100%;
+    border-radius: 7px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+  .dim-fill.animate { /* width set by JS */ }
+  .dim-score-label {
+    width: 60px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .dim-weight {
+    width: 40px;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .card-accent-left {
+    border-left: 4px solid;
+    padding-left: 20px;
+  }
+
+  .roast-card { border-left-color: var(--critical); background: var(--critical-dim); }
+  .win-card { border-left-color: var(--success); background: var(--success-dim); }
+  .antipattern-card { border-left-color: var(--warning); background: var(--warning-dim); }
+  .no-antipatterns { border-left-color: var(--success); background: var(--success-dim); }
+
+  .card-number {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 2rem;
+    font-weight: 800;
+    opacity: 0.15;
+    line-height: 1;
+  }
+  .card-issue {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    padding-right: 40px;
+  }
+  .card-body {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .card-body strong { color: var(--text); }
+  .card-fix {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .card-fix-label { font-weight: 700; color: var(--accent); }
+  .effort-pill {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 12px;
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  /* ---- FINDINGS (COLLAPSIBLE) ---- */
+  .findings-section { margin-bottom: 48px; }
+
+  .collapsible {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .collapsible-header:hover { background: rgba(255,255,255,0.03); }
+  .collapsible-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .collapsible-score {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .collapsible-arrow {
+    font-size: 1rem;
+    transition: transform 0.3s;
+  }
+  .collapsible.open .collapsible-arrow { transform: rotate(180deg); }
+  .collapsible-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .collapsible.open .collapsible-body { max-height: 2000px; }
+  .collapsible-inner {
+    padding: 0 20px 16px;
+  }
+
+  .finding-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .finding-row:last-child { border-bottom: none; }
+  .severity-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .severity-CRITICAL { background: var(--critical-dim); color: var(--critical); }
+  .severity-WARNING { background: var(--warning-dim); color: var(--warning); }
+  .severity-SUGGESTION { background: var(--suggestion-dim); color: var(--suggestion); }
+  .severity-PASS { background: var(--success-dim); color: var(--success); }
+  .finding-text { font-size: 0.88rem; color: var(--text-secondary); }
+
+  /* ---- IMPROVEMENT PATH ---- */
+  .improvement-section { margin-bottom: 48px; }
+
+  .improvement-timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .improvement-timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .improvement-step {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .improvement-step::before {
+    content: '';
+    position: absolute;
+    left: -27px;
+    top: 22px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .step-action {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .step-meta {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .step-meta span { display: flex; align-items: center; gap: 4px; }
+
+  .improvement-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .grade-box {
+    text-align: center;
+    padding: 16px 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-width: 100px;
+  }
+  .grade-box-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .grade-box-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+  .grade-arrow {
+    font-size: 1.5rem;
+    color: var(--accent);
+  }
+  .est-time {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 12px;
+  }
+
+  /* ---- INDUSTRY ---- */
+  .industry-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 48px;
+  }
+  .industry-position {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 8px;
+  }
+  .pos-above { background: var(--success-dim); color: var(--success); }
+  .pos-at { background: var(--suggestion-dim); color: var(--suggestion); }
+  .pos-below { background: var(--critical-dim); color: var(--critical); }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    text-align: center;
+    padding: 32px 0 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+  }
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    body { padding: 16px 10px 60px; }
+    .header-title { font-size: 1.4rem; }
+    .gauge-wrap { width: 160px; height: 160px; }
+    .gauge-svg { width: 160px; height: 160px; }
+    .gauge-number { font-size: 2.6rem; }
+    .dim-name { width: 120px; font-size: 0.82rem; }
+    .dim-bar { gap: 8px; }
+    .dim-weight { display: none; }
+    .card { padding: 16px; }
+    .improvement-summary { gap: 12px; }
+    .grade-box { min-width: 80px; padding: 12px 16px; }
+    .grade-box-value { font-size: 1.4rem; }
+  }
+
+  /* ---- PRINT ---- */
+  @media print {
+    :root {
+      --bg: #fff;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-secondary: #475569;
+    }
+    body {
+      background: #fff;
+      color: #0f172a;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .header-title {
+      -webkit-text-fill-color: #ea580c;
+      color: #ea580c;
+    }
+    .fade-in-up { opacity: 1; transform: none; }
+    .collapsible.open .collapsible-body,
+    .collapsible .collapsible-body { max-height: none; }
+    .dim-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <!-- HEADER -->
+  <header class="header fade-in-up">
+    <div class="header-title">LANDING PAGE ROAST</div>
+    <a class="header-url" id="header-url" href="#" target="_blank" rel="noopener"></a>
+    <div class="meta-pills" id="meta-pills"></div>
+    <div class="provisional-banner" id="provisional-banner">
+      Scores are provisional &mdash; page returned server errors during analysis. Fix the server error and re-run for accurate results.
+    </div>
+  </header>
+
+  <!-- OVERALL SCORE -->
+  <section class="score-hero fade-in-up" id="score-hero">
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 200 200">
+        <circle class="gauge-bg" cx="100" cy="100" r="90"></circle>
+        <circle class="gauge-fill" id="gauge-circle" cx="100" cy="100" r="90"
+                stroke-dasharray="565.49" stroke-dashoffset="565.49"></circle>
+      </svg>
+      <div class="gauge-score">
+        <div class="gauge-number" id="gauge-number">0</div>
+        <div class="gauge-out-of">/ 100</div>
+      </div>
+    </div>
+    <div class="gauge-grade" id="gauge-grade"></div>
+    <p class="verdict" id="verdict"></p>
+  </section>
+
+  <!-- DIMENSION BARS -->
+  <section class="dimension-section fade-in-up" id="dimensions-section">
+    <div class="section-title"><span class="section-title-icon">&#128202;</span> Dimension Breakdown</div>
+    <div id="dimension-bars"></div>
+  </section>
+
+  <!-- ROASTS -->
+  <section class="fade-in-up" id="roasts-section">
+    <div class="section-title"><span class="section-title-icon">&#128293;</span> Top Roasts</div>
+    <div id="roasts-list"></div>
+  </section>
+
+  <!-- WINS -->
+  <section class="fade-in-up" id="wins-section" style="margin-top: 40px;">
+    <div class="section-title"><span class="section-title-icon">&#9989;</span> Top Wins</div>
+    <div id="wins-list"></div>
+  </section>
+
+  <!-- FINDINGS -->
+  <section class="findings-section fade-in-up" id="findings-section" style="margin-top: 48px;">
+    <div class="section-title"><span class="section-title-icon">&#128270;</span> Full Findings</div>
+    <div id="findings-list"></div>
+  </section>
+
+  <!-- ANTI-PATTERNS -->
+  <section class="fade-in-up" id="antipatterns-section" style="margin-bottom: 48px;">
+    <div class="section-title"><span class="section-title-icon">&#9888;&#65039;</span> Anti-Patterns</div>
+    <div id="antipatterns-list"></div>
+  </section>
+
+  <!-- PATH TO IMPROVEMENT -->
+  <section class="improvement-section fade-in-up" id="improvement-section">
+    <div class="section-title"><span class="section-title-icon">&#128200;</span> Path to Improvement</div>
+    <div class="improvement-timeline" id="improvement-timeline"></div>
+    <div class="improvement-summary" id="improvement-summary"></div>
+    <div class="est-time" id="est-time"></div>
+  </section>
+
+  <!-- INDUSTRY CONTEXT -->
+  <section class="fade-in-up" id="industry-section">
+    <div class="section-title"><span class="section-title-icon">&#127919;</span> Industry Context</div>
+    <div class="industry-card" id="industry-card"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Audited by <strong>Roast My Landing Page</strong> &mdash; a <a href="https://github.com/tomer-ezri" target="_blank" rel="noopener">Claude Code Skill</a></p>
+    <p style="margin-top: 4px;" id="footer-date"></p>
+  </footer>
+
+</div>
+
+<script id="report-data" type="application/json">{{REPORT_DATA}}</script>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---- DATA ----
+  var raw = document.getElementById('report-data').textContent;
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { document.getElementById('app').innerHTML = '<p style="color:#ef4444;text-align:center;margin-top:80px;">Failed to parse report data.</p>'; return; }
+
+  // ---- HELPERS ----
+  function scoreColor(s) {
+    if (s >= 90) return '#22c55e';
+    if (s >= 80) return '#3b82f6';
+    if (s >= 70) return '#f59e0b';
+    if (s >= 60) return '#f97316';
+    return '#ef4444';
+  }
+  function severityClass(sev) { return 'severity-' + (sev || 'SUGGESTION').toUpperCase(); }
+  function esc(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+
+  // ---- HEADER ----
+  var urlEl = document.getElementById('header-url');
+  urlEl.href = data.meta.url;
+  urlEl.textContent = data.meta.url;
+
+  var pillsHtml = '';
+  if (data.meta.businessType) pillsHtml += '<span class="pill"><span class="pill-label">Type:</span> ' + esc(data.meta.businessType) + '</span>';
+  if (data.meta.conversionGoal) pillsHtml += '<span class="pill"><span class="pill-label">Goal:</span> ' + esc(data.meta.conversionGoal) + '</span>';
+  if (data.meta.targetCustomer) pillsHtml += '<span class="pill"><span class="pill-label">Audience:</span> ' + esc(data.meta.targetCustomer) + '</span>';
+  if (data.meta.launchStage) pillsHtml += '<span class="pill"><span class="pill-label">Stage:</span> ' + esc(data.meta.launchStage) + '</span>';
+  if (data.meta.mode) pillsHtml += '<span class="pill"><span class="pill-label">Mode:</span> ' + esc(data.meta.mode) + '</span>';
+  if (data.meta.date) pillsHtml += '<span class="pill">' + esc(data.meta.date) + '</span>';
+  document.getElementById('meta-pills').innerHTML = pillsHtml;
+
+  if (data.meta.provisional) {
+    document.getElementById('provisional-banner').classList.add('show');
+  }
+
+  // ---- SCORE HERO ----
+  var score = data.overall.score || 0;
+  var color = scoreColor(score);
+  var circle = document.getElementById('gauge-circle');
+  var circumference = 2 * Math.PI * 90; // ~565.49
+  var offset = circumference - (score / 100) * circumference;
+  circle.style.stroke = color;
+
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      circle.style.strokeDashoffset = offset;
+    }, 200);
+  });
+
+  document.getElementById('gauge-number').textContent = score;
+  document.getElementById('gauge-number').style.color = color;
+
+  var gradeEl = document.getElementById('gauge-grade');
+  gradeEl.textContent = data.overall.grade || '';
+  gradeEl.style.color = color;
+
+  document.getElementById('verdict').textContent = data.overall.verdict || '';
+
+  // ---- DIMENSIONS ----
+  var dimsHtml = '';
+  (data.dimensions || []).forEach(function(dim) {
+    var c = scoreColor(dim.score);
+    var isCritical = dim.score < 60;
+    dimsHtml += '<div class="dim-bar">' +
+      '<div class="dim-name">' + esc(dim.name) +
+        (isCritical ? ' <span class="dim-critical-badge">!!</span>' : '') +
+      '</div>' +
+      '<div class="dim-track"><div class="dim-fill" data-width="' + dim.score + '" style="background:' + c + ';"></div></div>' +
+      '<div class="dim-score-label" style="color:' + c + ';">' + dim.score + '/100</div>' +
+      '<div class="dim-weight">' + Math.round(dim.weight * 100) + '%</div>' +
+    '</div>';
+  });
+  document.getElementById('dimension-bars').innerHTML = dimsHtml;
+
+  // ---- ROASTS ----
+  var roastsHtml = '';
+  (data.roasts || []).forEach(function(r, i) {
+    roastsHtml += '<div class="card card-accent-left roast-card">' +
+      '<div class="card-number">' + (i + 1) + '</div>' +
+      '<div class="card-issue">\uD83D\uDD25 ' + esc(r.issue) + '</div>' +
+      '<div class="card-body"><strong>Why it matters:</strong> ' + esc(r.why) + '</div>' +
+      '<div class="card-fix"><span class="card-fix-label">Fix: </span>' + esc(r.fix) + '</div>' +
+      (r.effort ? '<span class="effort-pill">' + esc(r.effort) + '</span>' : '') +
+    '</div>';
+  });
+  document.getElementById('roasts-list').innerHTML = roastsHtml;
+
+  // ---- WINS ----
+  var winsHtml = '';
+  (data.wins || []).forEach(function(w, i) {
+    winsHtml += '<div class="card card-accent-left win-card">' +
+      '<div class="card-number">' + (i + 1) + '</div>' +
+      '<div class="card-issue">\u2705 ' + esc(w.what) + '</div>' +
+      '<div class="card-body"><strong>Why it works:</strong> ' + esc(w.why) + '</div>' +
+    '</div>';
+  });
+  document.getElementById('wins-list').innerHTML = winsHtml;
+
+  // ---- FINDINGS ----
+  var findingsMap = {
+    firstImpression: 'First Impression',
+    copyMessaging: 'Copy & Messaging',
+    callToAction: 'Call-to-Action',
+    trustProof: 'Trust & Proof',
+    mobileAccess: 'Mobile & Access',
+    performance: 'Performance'
+  };
+  var dimScoreMap = {};
+  (data.dimensions || []).forEach(function(d) { dimScoreMap[d.name] = d.score; });
+
+  var findingsHtml = '';
+  var fKeys = Object.keys(findingsMap);
+  fKeys.forEach(function(key) {
+    var items = (data.findings && data.findings[key]) || [];
+    var label = findingsMap[key];
+    var dimScore = dimScoreMap[label];
+    var c = dimScore !== undefined ? scoreColor(dimScore) : var('--text');
+
+    findingsHtml += '<div class="collapsible" data-collapsible>' +
+      '<div class="collapsible-header">' +
+        '<span class="collapsible-label">' + esc(label) +
+          (dimScore !== undefined ? ' <span class="collapsible-score" style="background:' + c + '20;color:' + c + ';">' + dimScore + '/100</span>' : '') +
+        '</span>' +
+        '<span class="collapsible-arrow">\u25BC</span>' +
+      '</div>' +
+      '<div class="collapsible-body"><div class="collapsible-inner">';
+
+    if (items.length === 0) {
+      findingsHtml += '<div class="finding-row"><span class="finding-text" style="color:var(--text-secondary);font-style:italic;">No findings recorded.</span></div>';
+    } else {
+      items.forEach(function(f) {
+        var sev = (f.severity || 'SUGGESTION').toUpperCase();
+        findingsHtml += '<div class="finding-row">' +
+          '<span class="severity-badge ' + severityClass(sev) + '">' + esc(sev) + '</span>' +
+          '<span class="finding-text">' + esc(f.description) + '</span>' +
+        '</div>';
+      });
+    }
+
+    findingsHtml += '</div></div></div>';
+  });
+  document.getElementById('findings-list').innerHTML = findingsHtml;
+
+  // Collapsible click handlers
+  document.querySelectorAll('[data-collapsible]').forEach(function(el) {
+    el.querySelector('.collapsible-header').addEventListener('click', function() {
+      el.classList.toggle('open');
+    });
+  });
+
+  // ---- ANTI-PATTERNS ----
+  var apSection = document.getElementById('antipatterns-section');
+  var ap = data.antiPatterns || [];
+  if (ap.length === 0) {
+    document.getElementById('antipatterns-list').innerHTML =
+      '<div class="card card-accent-left no-antipatterns">' +
+        '<div class="card-issue">\u2705 No anti-patterns detected</div>' +
+        '<div class="card-body">Nice! Your page avoids the common conversion-killing mistakes.</div>' +
+      '</div>';
+  } else {
+    var apHtml = '';
+    ap.forEach(function(p) {
+      var sevColor = p.severity === 'Critical' ? 'var(--critical)' : (p.severity === 'Warning' ? 'var(--warning)' : 'var(--text-secondary)');
+      var sevBg = p.severity === 'Critical' ? 'var(--critical-dim)' : (p.severity === 'Warning' ? 'var(--warning-dim)' : 'var(--accent-dim)');
+      apHtml += '<div class="card card-accent-left antipattern-card">' +
+        '<div class="card-issue">\u26A0\uFE0F ' + esc(p.name) + ' <span class="severity-badge" style="background:' + sevBg + ';color:' + sevColor + ';">' + esc(p.severity) + '</span></div>' +
+        '<div class="card-body">' + esc(p.impact) + '</div>' +
+      '</div>';
+    });
+    document.getElementById('antipatterns-list').innerHTML = apHtml;
+  }
+
+  // ---- IMPROVEMENT ----
+  var imp = data.improvement || {};
+  var steps = imp.steps || [];
+  var timelineHtml = '';
+  steps.forEach(function(step) {
+    timelineHtml += '<div class="improvement-step">' +
+      '<div class="step-action">' + esc(step.action) + '</div>' +
+      '<div class="step-meta">' +
+        '<span>\uD83C\uDFAF ' + esc(step.dimension) + '</span>' +
+        '<span>\uD83D\uDCC8 ' + step.currentScore + ' \u2192 ' + step.projectedScore + '</span>' +
+        (step.time ? '<span>\u23F1 ' + esc(step.time) + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  });
+  document.getElementById('improvement-timeline').innerHTML = timelineHtml;
+
+  var curColor = scoreColor(data.overall.score);
+  var projScore = imp.projectedScore || 0;
+  var projColor = scoreColor(projScore);
+  document.getElementById('improvement-summary').innerHTML =
+    '<div class="grade-box"><div class="grade-box-label">Current</div><div class="grade-box-value" style="color:' + curColor + ';">' + esc(imp.currentGrade || data.overall.grade) + '</div></div>' +
+    '<div class="grade-arrow">\u2192</div>' +
+    '<div class="grade-box"><div class="grade-box-label">Projected</div><div class="grade-box-value" style="color:' + projColor + ';">' + esc(imp.projectedGrade || '?') + '</div></div>';
+  document.getElementById('est-time').textContent = imp.estimatedTime ? 'Estimated time: ' + imp.estimatedTime : '';
+
+  // ---- INDUSTRY ----
+  var ind = data.industry || {};
+  var posClass = ind.position === 'above' ? 'pos-above' : (ind.position === 'at' ? 'pos-at' : 'pos-below');
+  var posLabel = ind.position === 'above' ? 'Above benchmark' : (ind.position === 'at' ? 'At benchmark' : 'Below benchmark');
+  document.getElementById('industry-card').innerHTML =
+    '<div style="font-weight:700;margin-bottom:8px;">' + esc(ind.businessType || data.meta.businessType || 'General') +
+      '<span class="industry-position ' + posClass + '">' + esc(posLabel) + '</span>' +
+    '</div>' +
+    '<div style="font-size:0.9rem;color:var(--text-secondary);">' + esc(ind.benchmark || '') + '</div>';
+
+  // ---- FOOTER DATE ----
+  document.getElementById('footer-date').textContent = data.meta.date || new Date().toISOString().slice(0,10);
+
+  // ---- SCROLL ANIMATIONS ----
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+
+        // Animate dimension bars when they scroll in
+        var bars = entry.target.querySelectorAll('.dim-fill');
+        bars.forEach(function(bar) {
+          var w = bar.getAttribute('data-width');
+          if (w) bar.style.width = w + '%';
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in-up').forEach(function(el) {
+    observer.observe(el);
+  });
+
+})();
+</script>
+
+</body>
+</html>
