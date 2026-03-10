@@ -149,4 +149,4 @@ MIT
 
 ---
 
-*Made by [FuzulsFriend](https://github.com/FuzulsFriend)*
+*Made by [Tomer E (FuzulsFriend)](https://github.com/FuzulsFriend)*
