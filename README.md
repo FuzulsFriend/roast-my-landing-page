@@ -1,59 +1,57 @@
+![Roast My Landing Page](assets/banner.svg)
+
 # Roast My Landing Page
 
-> A Claude Code skill that audits any landing page across 6 dimensions and delivers a brutally honest score out of 100 — with specific fixes explained in plain English.
+[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-orange)](https://code.claude.com)
+[![SKILL.md](https://img.shields.io/badge/SKILL.md-open%20standard-orange)](SKILL.md)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blue)](https://code.claude.com)
-[![SKILL.md](https://img.shields.io/badge/SKILL.md-open%20standard-purple)](SKILL.md)
+Give Claude a URL. Get a scored, plain-English report with specific fixes and time estimates.
 
 ---
 
-## What it does
+## You don't need to know UX to get an expert audit
 
-Give it a URL. Get back a scored report card with specific fixes — not vague advice.
+You give Claude the URL. Claude scores it across 6 dimensions using the same frameworks professional UX consultants use. The report tells you exactly what to fix, how long it will take, and why it matters. You do not need any background in UX, conversion rate optimization, or web design to act on the results.
 
-Uses established UX and conversion frameworks (Nielsen's 10 Heuristics, StoryBrand, CRO Pyramid, WCAG 2.2 AA) — not opinions.
+---
 
-**6 audit dimensions:**
+## What it checks
 
-| Dimension | Weight | What it checks |
+| Dimension | Weight | What it means |
 |-----------|--------|---------------|
 | First Impression | 20% | Can a visitor understand what you do in 3 seconds? |
-| Copy & Messaging | 20% | Is the writing clear, jargon-free, and benefit-focused? |
-| Call-to-Action | 15% | Is the CTA visible, compelling, and the only clear action? |
-| Trust & Social Proof | 15% | Are there testimonials, logos, numbers, or guarantees? |
-| Mobile & Accessibility | 15% | Does the page work on phones? Is it accessible? |
-| Performance & Technical | 15% | Does it load fast? Are SEO basics covered? |
+| Copy and Messaging | 20% | Is the writing clear, jargon-free, and benefit-focused? |
+| Call-to-Action | 15% | Is the CTA visible, compelling, and the only clear next step? |
+| Trust and Social Proof | 15% | Are there testimonials, logos, numbers, or guarantees? |
+| Mobile and Accessibility | 15% | Does the page work on phones? Can everyone use it? |
+| Performance and Technical | 15% | Does it load fast? Are the SEO basics covered? |
 
-Every finding includes: what's wrong, why it matters, specific fix, and time estimate.
+Every finding includes: what is wrong, why it matters, the specific fix, and a time estimate.
 
 ---
 
 ## Install
 
 ```bash
-npx skills add FuzulsFriend/roast-my-landing-page
+git clone https://github.com/FuzulsFriend/roast-my-landing-page ~/.claude/skills/roast-my-landing-page
 ```
-
-Or manually: copy `SKILL.md` into your `.claude/skills/` directory.
 
 **Recommended for visual analysis:**
-```bash
-npx skills add lackeyjb/playwright-skill --skill playwright-skill
-```
+
+- [Playwright CLI](https://github.com/lackeyjb/playwright-skill) - takes screenshots at multiple viewports
+- [Chrome DevTools MCP](https://github.com/modelcontextprotocol/servers) - runs Lighthouse and captures console errors
 
 ---
 
 ## Usage
-
-Just ask Claude:
 
 ```
 Roast my landing page: https://yoursite.com
 ```
 
 ```
-Audit my website
+Audit my website and tell me the top 3 things killing conversions
 ```
 
 ```
@@ -84,7 +82,31 @@ TOP 3 ROASTS:
 3. "The signup button says 'Get Started' but..."
 ```
 
-Plus: a visual browser report with animated score gauge, collapsible findings per dimension, and a step-by-step improvement timeline.
+Plus a visual browser report with an animated score gauge, color-coded dimension bars, collapsible findings per section, and a step-by-step improvement timeline.
+
+---
+
+## Built on proven UX and conversion frameworks
+
+This skill does not score based on opinions. Every dimension maps to a published, peer-reviewed, or industry-standard framework.
+
+**[Nielsen's 10 Usability Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)** - Jakob Nielsen, Nielsen Norman Group, 1994. The most cited usability framework in existence, used by every major UX team in the world. It gives the audit a principled checklist for identifying confusion, inconsistency, and friction before a user ever bounces.
+
+**[StoryBrand Framework](https://buildingastorybrand.com/)** - Donald Miller, 2017. Clarifies messaging by placing the customer as the hero of the story. It explains why most landing pages confuse visitors instead of converting them, and gives Claude a structured way to diagnose that confusion.
+
+**[CRO Pyramid / LIFT Model](https://www.widerfunnel.com/conversion-rate-optimization/)** - WiderFunnel. Breaks conversion down into 6 factors: Value Proposition, Relevance, Clarity, Anxiety, Distraction, and Urgency. Informed by thousands of A/B tests across real campaigns, it keeps the scoring grounded in what actually moves the needle.
+
+**[WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/)** - W3C Web Accessibility Guidelines. The international standard for web accessibility. Ensures your page works for people with disabilities, and keeps you on the right side of accessibility law.
+
+**[Core Web Vitals](https://web.dev/vitals/)** - Google. Google's official performance metrics: Largest Contentful Paint, Interaction to Next Paint, and Cumulative Layout Shift. Slow pages rank lower in search results and convert worse.
+
+**[Baymard Institute Research](https://baymard.com/)** - 130,000+ hours of UX research on real users. Informed the trust signal and CTA scoring criteria with data from studies on how real people read, click, and abandon pages.
+
+---
+
+## Industry-aware scoring
+
+Different business types have different success criteria. Scoring adjusts for SaaS, ecommerce, course, agency, newsletter, and early-stage or pre-launch products. A page with zero testimonials scores differently for a day-1 launch than for a product that has been live for 6 months.
 
 ---
 
@@ -94,53 +116,38 @@ Plus: a visual browser report with animated score gauge, collapsible findings pe
 roast-my-landing-page/
 ├── SKILL.md                           # Main skill instructions
 ├── assets/
+│   ├── banner.svg                     # Repository banner
+│   ├── preview.png                    # Example report screenshot
 │   ├── report-template.md             # Text report template
 │   └── report-ui.html                 # Visual browser report (fire theme)
 └── references/
     ├── scoring-rubric.md              # Exact checkpoints per dimension
     ├── nielsen-heuristics.md          # 10 heuristics adapted for landing pages
     ├── storybrand-framework.md        # StoryBrand audit format
-    ├── cro-checklist.md               # CRO Pyramid + CTA rules
+    ├── cro-checklist.md               # CRO Pyramid and CTA rules
     ├── copy-analysis-rules.md         # Headline, body copy, jargon detection
     ├── wcag-essentials.md             # 8 WCAG rules in plain English
     ├── anti-patterns.md               # 17 always-wrong patterns
     ├── industry-benchmarks.md         # Weight adjustments per business type
     └── examples/
-        ├── score-90-plus.md           # What an A+ page looks like
+        ├── score-90-plus.md           # What an A-plus page looks like
         └── common-fails.md            # Top 10 most common issues
 ```
 
 ---
 
-## Works with
+## Works best with
 
-- **Agent Teams mode** — all 6 dimensions analyzed in parallel
-- **Playwright CLI** — screenshots at 3 viewports, E2E smoke test
-- **Chrome DevTools MCP** — Lighthouse metrics, console errors
-
-Enable Agent Teams:
-```bash
-export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-```
-
----
-
-## Industry-aware scoring
-
-Different business types have different success criteria. The skill adjusts its scoring for:
-- **SaaS** — trust signals and trial friction weighted heavily
-- **Ecommerce** — product imagery and checkout flow
-- **Course/coaching** — authority signals and transformation framing
-- **Agency** — portfolio and credibility markers
-- **Newsletter** — value proposition and low-friction signup
-- **Early-stage / pre-launch** — social proof substitutes (founder credentials, beta count)
+- **[Playwright CLI](https://github.com/lackeyjb/playwright-skill)** - screenshots at 3 viewports plus an E2E smoke test
+- **[Chrome DevTools MCP](https://github.com/modelcontextprotocol/servers)** - Lighthouse metrics and console errors
+- **Agent Teams mode** - all 6 dimensions analyzed in parallel for faster results (`export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
 
 ---
 
 ## License
 
-MIT — use it, fork it, improve it, share it.
+MIT
 
 ---
 
-*Built with the [SKILL.md open standard](https://github.com/FuzulsFriend/roast-my-landing-page/blob/main/SKILL.md) — works across Claude Code, Codex CLI, Gemini CLI, and 15+ other AI coding assistants.*
+*Made by [FuzulsFriend](https://github.com/FuzulsFriend) · Built with [Claude Code](https://code.claude.com)*

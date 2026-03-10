@@ -751,7 +751,7 @@
     var items = (data.findings && data.findings[key]) || [];
     var label = findingsMap[key];
     var dimScore = dimScoreMap[label];
-    var c = dimScore !== undefined ? scoreColor(dimScore) : var('--text');
+    var c = dimScore !== undefined ? scoreColor(dimScore) : 'var(--text)';
 
     findingsHtml += '<div class="collapsible" data-collapsible>' +
       '<div class="collapsible-header">' +
