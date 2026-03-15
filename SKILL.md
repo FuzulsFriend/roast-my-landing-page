@@ -40,56 +40,46 @@ I use established UX and conversion frameworks (Nielsen Heuristics,
 StoryBrand, CRO best practices, WCAG accessibility) — not just opinions.
 ```
 
-### Install Dependencies
+### Startup Sequence (Tool Detection + Context Questions)
 
-```
-RECOMMENDED:
-  read-website-fast MCP (reads full page content fast)
-    Install: claude mcp add read-website-fast -s user -- npx -y @just-every/mcp-read-website-fast
-    Repo:    https://github.com/just-every/mcp-read-website-fast
+At the start of every run, do these **in parallel**:
 
-  Playwright CLI skill (takes screenshots + tests user interactions)
-    Install: npx skills add lackeyjb/playwright-skill --skill playwright-skill
-    Repo:    https://github.com/lackeyjb/playwright-skill
+**A. Background Tool Detection (run silently while asking questions):**
 
-OPTIONAL:
-  Chrome DevTools MCP (Lighthouse audit + console errors + performance)
-    Install: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest
-    Repo:    https://github.com/ChromeDevTools/chrome-devtools-mcp
+Search for these tools/MCPs without blocking the user:
 
-SPEED BOOST:
-  Agent Teams mode lets me run all 6 analyses in parallel.
-  Enable: export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-  Docs:   https://code.claude.com/docs/en/agent-teams
-```
+| Tool | What it does | How to detect |
+|------|-------------|---------------|
+| read-website-fast MCP | Reads full page content fast | Check if `mcp__read-website-fast__read_website` tool is available |
+| Playwright CLI skill | Takes screenshots + tests interactions | Check if `playwright-cli` commands are available |
+| Chrome DevTools MCP | Lighthouse audit + console errors | Check if `mcp__chrome-devtools__*` tools are available |
+| Apify MCP | For JS-heavy or blocked pages | Check if `mcp__apify__*` tools are available |
 
-### Context Questions (BEFORE auditing)
-
-Ask these before starting any analysis:
+**B. Context Questions (ask immediately, don't wait for tool detection):**
 
 1. **What type of business is this?** (SaaS / ecommerce / course / agency / newsletter / other)
 2. **Who is your target customer?** (1 sentence)
 3. **What should visitors DO on this page?** (sign up / buy / book demo / download / other)
 4. **Is this launched publicly, or still in early access / pre-launch?** (This affects how strictly social proof and traction metrics are scored — see `references/industry-benchmarks.md` for early-stage exceptions.)
 
+**Skip any question** where the answer is already known from Claude's memory, prior conversations, or information the user provided in their initial message. If ALL answers are already known, confirm them briefly and proceed.
+
+**Wait for the user to answer all remaining questions before starting any analysis.**
+
 These answers change how the audit is scored — a SaaS page and an ecommerce page have different success criteria. See `references/industry-benchmarks.md` for details.
 
----
+### Tool Detection Results (after background check completes)
 
-## Tool Detection + Fallback Chain
+Once background detection finishes AND user has answered context questions:
 
-At the start of **every run**, detect available tools:
-
-### Page Fetching (pick first available)
-1. **read-website-fast MCP** — Best. Full page content, fast.
-2. **WebFetch** (built-in) — Adequate. Works for most public pages.
-3. **Apify RAG Web Browser** — For JS-heavy or blocked pages.
-4. **Ask user** — Last resort. "Paste your HTML or share a screenshot."
-
-### Screenshots (pick first available)
-1. **Playwright CLI** — Best. Captures 3 viewports (desktop 1440px, tablet 768px, mobile 375px).
-2. **Chrome DevTools MCP** — Good. Screenshots + Lighthouse metrics.
-3. **None available** — Text-only analysis. Announce: "I can't take screenshots. Install Playwright CLI for visual analysis."
+1. **If all recommended tools are available** → Announce tools and proceed to analysis.
+2. **If some tools are missing** → Tell the user which tools are missing, what they enable, and ask:
+   "Would you like help installing the missing tools? Or should I continue without them?"
+   - **If yes** → Provide install commands one by one and guide them through setup:
+     - read-website-fast: `claude mcp add read-website-fast -s user -- npx -y @just-every/mcp-read-website-fast`
+     - Playwright CLI: `npx skills add lackeyjb/playwright-skill --skill playwright-skill`
+     - Chrome DevTools: `claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest`
+   - **If no** → Continue, but announce: "Proceeding without [tool]. The report may not cover [what's missing — e.g., 'visual analysis' without Playwright, 'full page content' without read-website-fast]."
 
 ### Announce to User
 
@@ -199,6 +189,17 @@ EFFORT: [quick fix (under 30 min) / few hours / redesign needed]
 6. Generate "Top 3 Wins" — what the page does well
 7. Generate "Path to improvement" — specific steps to go up one letter grade
 8. Output using the format in `assets/report-template.md`
+
+### Phase 4.5: USER REVIEW (before visual report)
+
+After completing the text report (Phase 4), present it to the user and ask:
+
+**"Here's the full audit. Would you like to change anything, or should I generate the visual report?"**
+
+Wait for the user's response:
+- **If user requests changes** → Apply the changes to scores/findings/recommendations, update the text report, and ask again.
+- **If user approves** → Proceed to Phase 5 (visual report generation).
+- **If user says nothing specific** → Treat as approval and proceed to Phase 5.
 
 ### Phase 5: VISUAL REPORT (browser preview)
 

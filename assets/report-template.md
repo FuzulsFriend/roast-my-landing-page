@@ -118,8 +118,8 @@ Benchmark for this type: [BENCHMARK_DESCRIPTION from industry-benchmarks.md]
 Your position: [ABOVE/AT/BELOW average for this business type]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Audited by Roast My Landing Page
-github.com/tomer-ezri/roast-my-landing-page
+Audited by Roast My Landing Page — By Tomer & Guy
+github.com/FuzulsFriend
 ```
 
 ---
